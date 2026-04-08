@@ -42,6 +42,7 @@ jobs:
         run: |
           mkdir windows_package
           Copy-Item "build\Release\HexGameClient.exe" "windows_package\"
+          Copy-Item "build\Release\HexGameLauncher.exe" "windows_package\"
           Copy-Item "build\Release\HexGameServer.exe" "windows_package\"
           Get-ChildItem "build\Release\*.dll" | Copy-Item -Destination "windows_package\"
           
@@ -50,10 +51,12 @@ jobs:
           HOW TO CONNECT
           ==============
           
-          Run HexGameClient.exe <server_ip> <port>
+          1. Double-click HexGameLauncher.exe
+          2. Enter server and port
+          3. Click Connect
           
-          Example:
-          HexGameClient.exe 0.tcp.ngrok.io 12345
+          (Alternative from command line)
+          HexGameClient.exe <server_ip> <port>
           
           For hosting a server:
           Run HexGameServer.exe
