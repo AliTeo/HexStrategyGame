@@ -66,13 +66,11 @@ if(UNIX)
     target_link_libraries(HexGameServer PRIVATE pthread)
 endif()
 
-# Client executable
+# SFML graphical client executable
 add_executable(HexGameClient
-    client/src/main.cpp
-    client/src/GameClient.cpp
-    client/src/InputHandler.cpp
-    client/src/TextRenderer.cpp
-    client/src/MenuSystem.cpp
+    sfml_main.cpp
+    client/src/SFMLGameClient.cpp
+    client/src/HexRenderer.cpp
 )
 
 target_include_directories(HexGameClient PRIVATE
