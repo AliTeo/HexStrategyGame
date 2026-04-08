@@ -94,19 +94,20 @@ if(UNIX)
 endif()
 
 # GUI Launcher (Windows-friendly connection interface)
-add_executable(HexGameLauncher
-    client/src/gui_launcher.cpp
-)
-
-target_link_libraries(HexGameLauncher PRIVATE
-    SFML::Graphics
-    SFML::Window
-    SFML::System
-)
-
-# On Windows, hide console window for launcher
-if(WIN32)
-    set_target_properties(HexGameLauncher PROPERTIES
-        WIN32_EXECUTABLE TRUE
-    )
-endif()
+# Disabled - needs SFML 3 API updates
+# add_executable(HexGameLauncher
+#     client/src/gui_launcher.cpp
+# )
+# 
+# target_link_libraries(HexGameLauncher PRIVATE
+#     SFML::Graphics
+#     SFML::Window
+#     SFML::System
+# )
+# 
+# # On Windows, hide console window for launcher
+# if(WIN32)
+#     set_target_properties(HexGameLauncher PROPERTIES
+#         WIN32_EXECUTABLE TRUE
+#     )
+# endif()

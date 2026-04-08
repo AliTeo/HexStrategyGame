@@ -1,9 +1,15 @@
 #include "GameClient.h"
 #include <iostream>
-#include <sys/select.h>
-#include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
+
+// Platform-specific includes
+#ifdef _WIN32
+    // Windows doesn't need these Unix headers
+#else
+    #include <sys/select.h>
+    #include <unistd.h>
+    #include <termios.h>
+    #include <fcntl.h>
+#endif
 
 GameClient::GameClient()
     : myPlayerId_(-1), connected_(false), running_(false) {}

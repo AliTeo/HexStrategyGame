@@ -51,11 +51,10 @@ jobs:
           HOW TO CONNECT
           ==============
           
-          1. Double-click HexGameLauncher.exe
-          2. Enter the server IP address
-          3. Click Connect
+          Run HexGameClient.exe <server_ip> <port>
           
-          That's it! Enjoy the game!
+          Example:
+          HexGameClient.exe 0.tcp.ngrok.io 12345
           
           For hosting a server:
           Run HexGameServer.exe
