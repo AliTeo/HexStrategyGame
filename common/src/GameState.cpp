@@ -196,7 +196,7 @@ bool GameState::moveCharacter(const std::string& charId, const HexCoord& newPos)
 // Terrain
 TerrainType GameState::getTerrainAt(const HexCoord& pos) const {
     auto it = terrain.find(pos);
-    return (it != terrain.end()) ? it->second : TerrainType::VOID;
+    return (it != terrain.end()) ? it->second : TerrainType::OUT_OF_BOUNDS;
 }
 
 void GameState::setTerrainAt(const HexCoord& pos, TerrainType type) {
@@ -210,7 +210,7 @@ bool GameState::isWalkable(const HexCoord& pos) const {
     if (occupancy.count(pos)) return false;
     
     TerrainType t = getTerrainAt(pos);
-    return t != TerrainType::BLOCKED && t != TerrainType::VOID;
+    return t != TerrainType::BLOCKED && t != TerrainType::OUT_OF_BOUNDS;
 }
 
 bool GameState::isInBounds(const HexCoord& pos) const {

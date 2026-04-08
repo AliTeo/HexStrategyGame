@@ -197,7 +197,7 @@ std::string TextRenderer::getTerrainSymbol(TerrainType terrain) const {
         case TerrainType::BLOCKED: return "##";
         case TerrainType::FIRE: return "FF";
         case TerrainType::ICE: return "II";
-        case TerrainType::VOID: return "XX";
+        case TerrainType::OUT_OF_BOUNDS: return "XX";
         default: return "??";
     }
 }

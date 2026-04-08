@@ -28,7 +28,7 @@ enum class TerrainType {
     BLOCKED,        // Impassable
     FIRE,           // Damage over time
     ICE,            // Slippery/altered movement
-    VOID            // Out of bounds
+    OUT_OF_BOUNDS   // Out of bounds
 };
 
 /**
