@@ -62,7 +62,7 @@ jobs:
           "@ | Out-File -FilePath "windows_package\README.txt" -Encoding ASCII
       
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: HexGame-Windows-${{ github.sha }}
           path: windows_package/
@@ -98,7 +98,7 @@ jobs:
           make -j$(nproc)
       
       - name: Upload Linux Binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: HexGame-Linux-${{ github.sha }}
           path: |
