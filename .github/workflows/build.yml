@@ -1,0 +1,106 @@
+name: Build Windows Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+      
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+      
+      - name: Install dependencies
+        run: |
+          .\vcpkg\vcpkg install boost-asio:x64-windows
+          .\vcpkg\vcpkg install nlohmann-json:x64-windows
+      
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_TOOLCHAIN_FILE="${env:GITHUB_WORKSPACE}\vcpkg\scripts\buildsystems\vcpkg.cmake"
+      
+      - name: Build
+        run: cmake --build build --config Release
+      
+      - name: Create Package
+        run: |
+          mkdir windows_package
+          Copy-Item "build\Release\HexGameClient.exe" "windows_package\"
+          Copy-Item "build\Release\HexGameLauncher.exe" "windows_package\"
+          Copy-Item "build\Release\HexGameServer.exe" "windows_package\"
+          Get-ChildItem "build\Release\*.dll" | Copy-Item -Destination "windows_package\"
+          
+          # Create README
+          @"
+          HOW TO CONNECT
+          ==============
+          
+          1. Double-click HexGameLauncher.exe
+          2. Enter the server IP address
+          3. Click Connect
+          
+          That's it! Enjoy the game!
+          
+          For hosting a server:
+          Run HexGameServer.exe
+          "@ | Out-File -FilePath "windows_package\README.txt" -Encoding ASCII
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: HexGame-Windows-${{ github.sha }}
+          path: windows_package/
+      
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            windows_package/*.exe
+            windows_package/*.dll
+            windows_package/README.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libboost-dev
+      
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+      
+      - name: Upload Linux Binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: HexGame-Linux-${{ github.sha }}
+          path: |
+            build/HexGameServer
+            build/HexGameClient

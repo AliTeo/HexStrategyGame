@@ -1,0 +1,82 @@
+╔══════════════════════════════════════════════════════════════╗
+║         SFML BATTLE PHASE - CLICK-TO-COMMAND SYSTEM          ║
+╚══════════════════════════════════════════════════════════════╝
+
+STEP 1: SELECT CHARACTER
+┌──────────────────────────────────────┐
+│  Click on your character             │
+│                                      │
+│    [🔵Warrior] ← Click here          │
+│                                      │
+│  ✓ Yellow highlight appears          │
+│  ✓ Console: "Selected character..."  │
+└──────────────────────────────────────┘
+
+STEP 2: CHOOSE MODE
+┌──────────────────────────────────────┐
+│  Press keyboard key:                 │
+│                                      │
+│    [M] = Move Mode                   │
+│    [A] = Attack Mode                 │
+│                                      │
+│  ✓ Console shows current mode        │
+└──────────────────────────────────────┘
+
+STEP 3: SELECT TARGET
+┌──────────────────────────────────────┐
+│  Click on target hex                 │
+│                                      │
+│  MOVE:   🔵Warrior ──→ [ ]           │
+│          Blue arrow appears          │
+│                                      │
+│  ATTACK: 🟪Mage ──→ 🔴Enemy          │
+│          Red arrow appears           │
+└──────────────────────────────────────┘
+
+STEP 4: REPEAT (Optional)
+┌──────────────────────────────────────┐
+│  • Select another character          │
+│  • Choose mode (M or A)              │
+│  • Click target                      │
+│                                      │
+│  Note: Each character can only       │
+│        have ONE action               │
+└──────────────────────────────────────┘
+
+STEP 5: LOCK TURN
+┌──────────────────────────────────────┐
+│  Press [SPACEBAR]                    │
+│                                      │
+│  ✓ All actions submitted             │
+│  ✓ Unassigned chars auto-PASS        │
+│  ✓ Arrows disappear                  │
+│  ✓ Wait for opponent...              │
+└──────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+
+VISUAL INDICATORS:
+  🟡 Yellow highlight  = Selected character
+  🔵 Blue arrow       = Queued movement
+  🔴 Red arrow        = Queued attack
+  
+KEYBOARD SHORTCUTS:
+  M       = Move mode
+  A       = Attack mode
+  SPACE   = Lock turn
+  ESC     = Quit game
+
+═══════════════════════════════════════════════════════════════
+
+QUICK EXAMPLE:
+
+  1. Click Warrior → 🟡 highlight
+  2. Press M → "Mode: MOVE"
+  3. Click hex (-1,0) → 🔵 arrow appears
+  4. Click Mage → 🟡 highlight moves
+  5. Press A → "Mode: ATTACK"  
+  6. Click enemy at (2,-1) → 🔴 arrow appears
+  7. (Healer not selected = auto PASS)
+  8. Press SPACEBAR → Turn locked!
+
+═══════════════════════════════════════════════════════════════

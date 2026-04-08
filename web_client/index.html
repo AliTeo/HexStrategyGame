@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hex Strategy Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Connection Screen -->
+    <div id="connect-screen" class="screen active">
+        <div class="container">
+            <h1>⬡ Hex Strategy Game ⬡</h1>
+            <p class="subtitle">Online Multiplayer Turn-Based Strategy</p>
+            
+            <div class="connect-form">
+                <button id="connect-btn" class="btn btn-primary">
+                    Connect to Game
+                </button>
+                
+                <div id="connection-status" class="status-message"></div>
+            </div>
+            
+            <div class="info-box">
+                <h3>How to Play:</h3>
+                <ul>
+                    <li>Connect to your friend's server</li>
+                    <li>Select 3 characters from 6 classes</li>
+                    <li>Place them on the hexagonal grid</li>
+                    <li>Battle with simultaneous turn-based combat</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="game-container">
+            <!-- Header -->
+            <div class="game-header">
+                <div class="player-info">
+                    <span id="player-id">Player 0</span>
+                    <span id="game-phase">Connecting...</span>
+                </div>
+                <div class="connection-indicator">
+                    <span id="connection-status-game">●</span>
+                    <span id="server-address"></span>
+                </div>
+            </div>
+            
+            <!-- Main Game Area -->
+            <div class="game-main">
+                <!-- Hex Grid Canvas -->
+                <div class="canvas-container">
+                    <canvas id="hex-canvas"></canvas>
+                </div>
+                
+                <!-- Side Panel -->
+                <div class="side-panel">
+                    <!-- Character Selection -->
+                    <div id="character-selection" class="panel-section">
+                        <h3>Select 3 Characters</h3>
+                        <div id="character-list"></div>
+                    </div>
+                    
+                    <!-- Character Info -->
+                    <div id="character-info" class="panel-section">
+                        <h3>Selected Characters</h3>
+                        <div id="selected-characters"></div>
+                    </div>
+                    
+                    <!-- Battle Actions -->
+                    <div id="battle-actions" class="panel-section hidden">
+                        <h3>Actions</h3>
+                        <div id="action-buttons"></div>
+                        <button id="ready-btn" class="btn btn-success">Ready</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Log -->
+            <div class="game-log">
+                <div class="log-header">
+                    <h4>Game Log</h4>
+                    <button id="clear-log">Clear</button>
+                </div>
+                <div id="log-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>

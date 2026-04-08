@@ -1,0 +1,3 @@
+external/SFML/
+build/
+build_*/
