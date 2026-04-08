@@ -2,8 +2,8 @@
 #include <iostream>
 
 SFMLGameClient::SFMLGameClient()
-    : connected_(false), running_(false), myPlayerId_(-1),
-      currentPlacementIndex_(0), battleMode_(BattleMode::NONE) {
+    : connected_(false), running_(false), gameStarted_(false), myPlayerId_(-1),
+      currentPlacementIndex_(0), lobbyStatus_("Not connected"), battleMode_(BattleMode::NONE) {
 }
 
 SFMLGameClient::~SFMLGameClient() {
@@ -12,6 +12,7 @@ SFMLGameClient::~SFMLGameClient() {
 
 bool SFMLGameClient::connect(const std::string& host, const std::string& port) {
     try {
+        ioContext_.restart();
         socket_ = std::make_unique<tcp::socket>(ioContext_);
         
         tcp::resolver resolver(ioContext_);
@@ -20,6 +21,8 @@ bool SFMLGameClient::connect(const std::string& host, const std::string& port) {
         boost::asio::connect(*socket_, endpoints);
         
         connected_ = true;
+        gameStarted_ = false;
+        setLobbyStatus("Found server. Waiting for opponent...");
         std::cout << "Connected to server at " << host << ":" << port << std::endl;
         
         // Start IO thread
@@ -29,6 +32,7 @@ bool SFMLGameClient::connect(const std::string& host, const std::string& port) {
             } catch (std::exception& e) {
                 std::cerr << "IO error: " << e.what() << std::endl;
                 connected_ = false;
+                setLobbyStatus("Connection lost");
             }
         });
         
@@ -37,6 +41,7 @@ bool SFMLGameClient::connect(const std::string& host, const std::string& port) {
         
     } catch (std::exception& e) {
         std::cerr << "Connection failed: " << e.what() << std::endl;
+        setLobbyStatus("Unable to find server");
         return false;
     }
 }
@@ -57,6 +62,7 @@ void SFMLGameClient::disconnect() {
             ioThread_.join();
         }
     }
+    gameStarted_ = false;
 }
 
 void SFMLGameClient::startRead() {
@@ -69,12 +75,16 @@ void SFMLGameClient::startRead() {
                 };
                 readBuffer_.consume(bytes_transferred);
                 
-                messageBuffer_ += data;
+                {
+                    std::lock_guard<std::mutex> lock(messageMutex_);
+                    messageBuffer_ += data;
+                }
                 startRead();
             } else {
                 std::cerr << "Connection lost: " << error.message() << std::endl;
                 connected_ = false;
                 running_ = false;
+                setLobbyStatus("Connection lost");
             }
         });
 }
@@ -93,7 +103,16 @@ void SFMLGameClient::sendMessage(const std::string& message) {
 }
 
 void SFMLGameClient::processMessages() {
-    auto messages = Protocol::extractMessages(messageBuffer_);
+    std::string pendingBuffer;
+    {
+        std::lock_guard<std::mutex> lock(messageMutex_);
+        pendingBuffer.swap(messageBuffer_);
+    }
+    auto messages = Protocol::extractMessages(pendingBuffer);
+    if (!pendingBuffer.empty()) {
+        std::lock_guard<std::mutex> lock(messageMutex_);
+        messageBuffer_.insert(0, pendingBuffer);
+    }
     
     for (const auto& message : messages) {
         handleMessage(message);
@@ -111,14 +130,18 @@ void SFMLGameClient::handleMessage(const std::string& message) {
     switch (type) {
         case MessageType::CONNECTED:
             myPlayerId_ = data["playerId"];
+            setLobbyStatus("Found server. Waiting for opponent...");
             std::cout << "Connected as Player " << myPlayerId_ << std::endl;
             break;
             
         case MessageType::PLAYER_JOINED:
+            setLobbyStatus("Found server. Waiting for opponent...");
             std::cout << "Player " << data["playerId"].get<int>() << " joined" << std::endl;
             break;
             
         case MessageType::GAME_STARTED:
+            gameStarted_ = true;
+            setLobbyStatus("Opponent ready. Starting game...");
             std::cout << "Game starting!" << std::endl;
             break;
             
@@ -133,12 +156,35 @@ void SFMLGameClient::handleMessage(const std::string& message) {
             break;
             
         case MessageType::ERROR_MSG:
+            setLobbyStatus(data["error"].get<std::string>());
             std::cerr << "Server error: " << data["error"].get<std::string>() << std::endl;
             break;
             
         default:
             break;
     }
+}
+
+void SFMLGameClient::pumpNetwork() {
+    processMessages();
+}
+
+bool SFMLGameClient::isConnected() const noexcept {
+    return connected_;
+}
+
+bool SFMLGameClient::hasGameStarted() const noexcept {
+    return gameStarted_;
+}
+
+std::string SFMLGameClient::getLobbyStatus() const {
+    std::lock_guard<std::mutex> lock(statusMutex_);
+    return lobbyStatus_;
+}
+
+void SFMLGameClient::setLobbyStatus(std::string status) {
+    std::lock_guard<std::mutex> lock(statusMutex_);
+    lobbyStatus_ = std::move(status);
 }
 
 void SFMLGameClient::updateGameState(const GameState& newState) {
@@ -509,4 +555,3 @@ void SFMLGameClient::executeCommand(const HexCoord& targetHex) {
     pendingActions_.push_back(action);
     clearSelection();
 }
-

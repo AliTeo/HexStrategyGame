@@ -7,6 +7,8 @@
 #include <string>
 #include <thread>
 #include <deque>
+#include <mutex>
+#include <atomic>
 
 #include "GameState.h"
 #include "Protocol.h"
@@ -21,6 +23,10 @@ public:
     
     bool connect(const std::string& host, const std::string& port);
     void run();
+    void pumpNetwork();
+    bool isConnected() const noexcept;
+    bool hasGameStarted() const noexcept;
+    std::string getLobbyStatus() const;
     
 private:
     // Network functions
@@ -30,6 +36,7 @@ private:
     void processMessages();
     void handleMessage(const std::string& message);
     void updateGameState(const GameState& newState);
+    void setLobbyStatus(std::string status);
     
     // Game logic
     void handleSelectionPhase(sf::RenderWindow& window);
@@ -52,13 +59,17 @@ private:
     boost::asio::streambuf readBuffer_;
     std::string messageBuffer_;
     std::thread ioThread_;
-    bool connected_;
-    bool running_;
+    std::atomic_bool connected_;
+    std::atomic_bool running_;
+    std::atomic_bool gameStarted_;
     
     // Game state
     GameState gameState_;
     int myPlayerId_;
     int currentPlacementIndex_;  // Track which character we're placing (0, 1, or 2)
+    mutable std::mutex messageMutex_;
+    mutable std::mutex statusMutex_;
+    std::string lobbyStatus_;
     
     // Rendering
     HexRenderer renderer_;

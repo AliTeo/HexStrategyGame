@@ -2,11 +2,11 @@ name: Build Windows Release
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ '**' ]
     tags:
       - 'v*'
   pull_request:
-    branches: [ main, master ]
+    branches: [ '**' ]
   workflow_dispatch:
 
 jobs:

@@ -13,7 +13,7 @@ else()
 endif()
 
 # External dependencies
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED)
 set(JSON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/json/include)
 
 # Fetch SFML 3.0.2
@@ -59,7 +59,10 @@ target_include_directories(HexGameServer PRIVATE
     ${CMAKE_SOURCE_DIR}/server/include
 )
 
-target_link_libraries(HexGameServer PRIVATE HexGameCommon Boost::system)
+target_link_libraries(HexGameServer PRIVATE HexGameCommon)
+if(TARGET Boost::system)
+    target_link_libraries(HexGameServer PRIVATE Boost::system)
+endif()
 
 # Linux/Unix specific
 if(UNIX)
@@ -79,12 +82,14 @@ target_include_directories(HexGameClient PRIVATE
 
 target_link_libraries(HexGameClient PRIVATE 
     HexGameCommon 
-    Boost::system
     SFML::Graphics
     SFML::Window
     SFML::System
     SFML::Audio
 )
+if(TARGET Boost::system)
+    target_link_libraries(HexGameClient PRIVATE Boost::system)
+endif()
 
 # Linux/Unix specific
 if(UNIX)
