@@ -3,7 +3,7 @@
 
 // Platform-specific includes
 #ifdef _WIN32
-    // Windows doesn't need these Unix headers
+    #include <conio.h>   // _kbhit()
 #else
     #include <sys/select.h>
     #include <unistd.h>
@@ -273,6 +273,10 @@ void GameClient::displayCurrentState() {
 }
 
 bool GameClient::checkInputAvailable() {
+#ifdef _WIN32
+    // Non-blocking check for console keyboard input on Windows
+    return _kbhit() != 0;
+#else
     fd_set readfds;
     struct timeval tv;
     
@@ -285,6 +289,7 @@ bool GameClient::checkInputAvailable() {
     
     int result = select(STDIN_FILENO + 1, &readfds, nullptr, nullptr, &tv);
     return result > 0 && FD_ISSET(STDIN_FILENO, &readfds);
+#endif
 }
 
 void GameClient::handleUserInput() {
