@@ -27,7 +27,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          .\vcpkg\vcpkg install boost-asio:x64-windows
+          .\vcpkg\vcpkg install boost-asio:x64-windows boost-system:x64-windows
           .\vcpkg\vcpkg install nlohmann-json:x64-windows
       
       - name: Configure CMake

@@ -13,7 +13,10 @@ else()
 endif()
 
 # External dependencies
-find_package(Boost REQUIRED)
+find_package(Boost QUIET CONFIG COMPONENTS asio system)
+if(NOT Boost_FOUND)
+    find_package(Boost REQUIRED)
+endif()
 set(JSON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/json/include)
 
 # Fetch SFML 3.0.2
@@ -46,6 +49,25 @@ target_include_directories(HexGameCommon PUBLIC
     ${JSON_INCLUDE_DIR}
 )
 
+set(HEXGAME_BOOST_TARGETS)
+if(TARGET Boost::asio)
+    list(APPEND HEXGAME_BOOST_TARGETS Boost::asio)
+elseif(TARGET Boost::headers)
+    list(APPEND HEXGAME_BOOST_TARGETS Boost::headers)
+elseif(TARGET Boost::boost)
+    list(APPEND HEXGAME_BOOST_TARGETS Boost::boost)
+endif()
+
+if(TARGET Boost::system)
+    list(APPEND HEXGAME_BOOST_TARGETS Boost::system)
+endif()
+
+if(HEXGAME_BOOST_TARGETS)
+    target_link_libraries(HexGameCommon PUBLIC ${HEXGAME_BOOST_TARGETS})
+elseif(Boost_INCLUDE_DIRS)
+    target_include_directories(HexGameCommon PUBLIC ${Boost_INCLUDE_DIRS})
+endif()
+
 # Server executable
 add_executable(HexGameServer
     server/src/main.cpp
@@ -60,9 +82,6 @@ target_include_directories(HexGameServer PRIVATE
 )
 
 target_link_libraries(HexGameServer PRIVATE HexGameCommon)
-if(TARGET Boost::system)
-    target_link_libraries(HexGameServer PRIVATE Boost::system)
-endif()
 
 # Linux/Unix specific
 if(UNIX)
@@ -87,9 +106,6 @@ target_link_libraries(HexGameClient PRIVATE
     SFML::System
     SFML::Audio
 )
-if(TARGET Boost::system)
-    target_link_libraries(HexGameClient PRIVATE Boost::system)
-endif()
 
 # Linux/Unix specific
 if(UNIX)
