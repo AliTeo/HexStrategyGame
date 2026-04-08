@@ -34,6 +34,17 @@ void showError(const wchar_t* title, const wchar_t* message) {
     MessageBoxW(nullptr, message, title, MB_ICONERROR | MB_OK);
 }
 
+std::wstring formatWin32Error(DWORD errorCode) {
+    LPWSTR buffer = nullptr;
+    const DWORD flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+    const DWORD size = FormatMessageW(flags, nullptr, errorCode, 0, reinterpret_cast<LPWSTR>(&buffer), 0, nullptr);
+    std::wstring message = (size > 0 && buffer) ? std::wstring(buffer, size) : L"Unknown Windows error";
+    if (buffer) {
+        LocalFree(buffer);
+    }
+    return message;
+}
+
 void launchClient(HWND hwnd) {
     const std::wstring server = readEditText(g_serverEdit);
     const std::wstring port = readEditText(g_portEdit);
@@ -64,13 +75,15 @@ void launchClient(HWND hwnd) {
             dir.c_str(),
             &si,
             &pi)) {
-        showError(L"Launch Failed", L"Could not start HexGameClient.exe.\nMake sure it is in the same folder.");
+        const DWORD err = GetLastError();
+        std::wstring errorText =
+            L"Could not start HexGameClient.exe.\n\nError " + std::to_wstring(err) + L": " + formatWin32Error(err);
+        MessageBoxW(hwnd, errorText.c_str(), L"Launch Failed", MB_ICONERROR | MB_OK);
         return;
     }
 
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
-    DestroyWindow(hwnd);
 }
 }  // namespace
 
@@ -126,7 +139,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 
-    RegisterClassW(&wc);
+    const ATOM classAtom = RegisterClassW(&wc);
+    if (classAtom == 0) {
+        const DWORD err = GetLastError();
+        std::wstring errorText =
+            L"Failed to register launcher window class.\n\nError " + std::to_wstring(err) + L": " + formatWin32Error(err);
+        MessageBoxW(nullptr, errorText.c_str(), L"Launcher Error", MB_ICONERROR | MB_OK);
+        return 1;
+    }
 
     HWND hwnd = CreateWindowExW(
         0,
@@ -137,6 +157,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
         nullptr, nullptr, hInstance, nullptr);
 
     if (!hwnd) {
+        const DWORD err = GetLastError();
+        std::wstring errorText =
+            L"Failed to create launcher window.\n\nError " + std::to_wstring(err) + L": " + formatWin32Error(err);
+        MessageBoxW(nullptr, errorText.c_str(), L"Launcher Error", MB_ICONERROR | MB_OK);
         return 1;
     }
 
