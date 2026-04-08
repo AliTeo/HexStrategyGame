@@ -42,7 +42,6 @@ jobs:
         run: |
           mkdir windows_package
           Copy-Item "build\Release\HexGameClient.exe" "windows_package\"
-          Copy-Item "build\Release\HexGameLauncher.exe" "windows_package\"
           Copy-Item "build\Release\HexGameServer.exe" "windows_package\"
           Get-ChildItem "build\Release\*.dll" | Copy-Item -Destination "windows_package\"
           
