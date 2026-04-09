@@ -9,6 +9,8 @@
 #include <deque>
 #include <mutex>
 #include <atomic>
+#include <optional>
+#include <vector>
 
 #include "GameState.h"
 #include "Protocol.h"
@@ -39,12 +41,13 @@ private:
     void setLobbyStatus(std::string status);
     
     // Game logic
-    void handleSelectionPhase(sf::RenderWindow& window);
-    void handlePlacementPhase(sf::RenderWindow& window);
-    void handlePlayingPhase(sf::RenderWindow& window);
+    void handleSelectionPhase(sf::RenderTarget& window);
+    void handlePlacementPhase(sf::RenderTarget& window);
+    void handlePlayingPhase(sf::RenderTarget& window);
     
     // Input handling
     void handleMouseClick(sf::Vector2i mousePos, sf::RenderWindow& window);
+    void handleMouseMove(sf::Vector2i mousePos);
     void handleKeyPress(sf::Keyboard::Key key);
     
     // Commands
@@ -52,6 +55,8 @@ private:
     void placeCharacter(CharacterClass charClass, const HexCoord& pos);
     void submitAction(const Action& action);
     void lockTurn();
+    void sendReady();
+    void pushUiInfo(const std::string& text);
     
     // Network state
     boost::asio::io_context ioContext_;
@@ -76,6 +81,12 @@ private:
     
     // Selection state
     std::vector<CharacterClass> selectedClasses_;
+    std::optional<CharacterClass> hoveredSelectionClass_;
+    std::optional<CharacterClass> recentlySelectedClass_;
+    float selectionElapsedSeconds_;
+    float selectionFlashUntilSeconds_;
+    bool selectionReadySent_;
+    bool readyButtonHovered_;
     
     // Battle phase state
     enum class BattleMode {
@@ -87,6 +98,11 @@ private:
     std::string selectedCharacterId_;
     BattleMode battleMode_;
     std::vector<Action> pendingActions_;  // Actions queued for this turn
+    std::vector<std::string> uiInfoLines_;
+
+    sf::RenderTexture sceneTexture_;
+    sf::Shader postShader_;
+    bool postShaderLoaded_;
     
     // Helper functions for battle phase
     void clearSelection();

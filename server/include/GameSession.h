@@ -29,6 +29,7 @@ public:
     
     // Actions
     bool handleSelectCharacter(int playerId, CharacterClass charClass);
+    bool handleReady(int playerId);
     bool handlePlaceCharacter(int playerId, CharacterClass charClass, const HexCoord& pos);
     bool handleAction(const Action& action);
     bool handleLockTurn(int playerId);

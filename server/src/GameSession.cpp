@@ -36,15 +36,21 @@ void GameSession::startGame() {
 
 bool GameSession::handleSelectCharacter(int playerId, CharacterClass charClass) {
     if (gameState.phase != GamePhase::SELECTION) return false;
+    if (gameState.playerReady.count(playerId) && gameState.playerReady[playerId]) return false;
     
     bool success = gameState.selectCharacter(playerId, charClass);
-    
-    // Auto-advance to placement when both players have selected
-    if (success && gameState.bothPlayersSelectedCharacters()) {
+    return success;
+}
+
+bool GameSession::handleReady(int playerId) {
+    if (gameState.phase != GamePhase::SELECTION) return false;
+    if (!gameState.hasCompletedSelection(playerId)) return false;
+
+    gameState.setPlayerReady(playerId, true);
+    if (gameState.bothPlayersReady()) {
         startPlacement();
     }
-    
-    return success;
+    return true;
 }
 
 bool GameSession::handlePlaceCharacter(int playerId, CharacterClass charClass, const HexCoord& pos) {

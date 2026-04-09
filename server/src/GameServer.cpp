@@ -235,6 +235,17 @@ void GameServer::handleClientMessage(std::shared_ptr<ClientConnection> client,
             }
             break;
         }
+
+        case MessageType::READY: {
+            success = session->handleReady(playerId);
+            if (success) {
+                broadcastToSession(session->getSessionId(),
+                    Protocol::gameStateUpdateMessage(session->getGameState()));
+            } else {
+                errorMsg = "Cannot ready yet";
+            }
+            break;
+        }
         
         default:
             errorMsg = "Unknown message type";

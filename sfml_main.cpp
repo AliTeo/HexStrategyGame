@@ -1,6 +1,7 @@
 #include "SFMLGameClient.h"
 #include <SFML/Graphics.hpp>
 
+#include <algorithm>
 #include <array>
 #include <charconv>
 #include <cctype>
@@ -163,9 +164,15 @@ int main(int argc, char* argv[]) {
     }
     const sf::Font& font = *fontOpt;
 
+    sf::ContextSettings settings;
+    settings.antiAliasingLevel = std::min(8u, sf::RenderTexture::getMaximumAntiAliasingLevel());
+
     sf::RenderWindow window(sf::VideoMode({static_cast<unsigned int>(kWindowWidth), static_cast<unsigned int>(kWindowHeight)}),
-                            "Hexagonal Strategy Game");
-    window.setFramerateLimit(60);
+                            "Hexagonal Strategy Game",
+                            sf::Style::Default,
+                            sf::State::Windowed,
+                            settings);
+    window.setVerticalSyncEnabled(true);
 
     Screen screen = Screen::MainMenu;
     JoinRequest request;

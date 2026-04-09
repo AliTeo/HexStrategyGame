@@ -21,13 +21,19 @@ GameState::GameState()
 // Phase management
 void GameState::startSelection() {
     phase = GamePhase::SELECTION;
+    selectedClasses.clear();
+    characters.clear();
+    occupancy.clear();
+    for (int playerId : playerIds) {
+        playerReady[playerId] = false;
+    }
 }
 
 void GameState::startPlacement() {
     phase = GamePhase::PLACEMENT;
     
     // Create characters based on selections
-    for (int playerId = 0; playerId <= 1; ++playerId) {
+    for (int playerId : playerIds) {
         if (selectedClasses.count(playerId)) {
             int charIndex = 0;
             for (CharacterClass charClass : selectedClasses[playerId]) {
@@ -61,9 +67,15 @@ void GameState::addPlayer(int playerId) {
 }
 
 bool GameState::bothPlayersReady() const {
-    return playerIds.size() == 2 && 
-           playerReady.count(0) && playerReady.at(0) &&
-           playerReady.count(1) && playerReady.at(1);
+    if (playerIds.size() != 2) {
+        return false;
+    }
+    for (int playerId : playerIds) {
+        if (!playerReady.count(playerId) || !playerReady.at(playerId)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void GameState::setPlayerReady(int playerId, bool ready) {
@@ -72,10 +84,19 @@ void GameState::setPlayerReady(int playerId, bool ready) {
 
 // Character selection
 bool GameState::selectCharacter(int playerId, CharacterClass charClass) {
-    if (selectedClasses[playerId].size() >= CHARS_PER_PLAYER) {
+    auto& selections = selectedClasses[playerId];
+    auto existing = std::find(selections.begin(), selections.end(), charClass);
+    if (existing != selections.end()) {
+        selections.erase(existing);
+        playerReady[playerId] = false;
+        return true;
+    }
+
+    if (selections.size() >= CHARS_PER_PLAYER) {
         return false;
     }
-    selectedClasses[playerId].push_back(charClass);
+    selections.push_back(charClass);
+    playerReady[playerId] = false;
     return true;
 }
 
@@ -85,7 +106,15 @@ bool GameState::hasCompletedSelection(int playerId) const {
 }
 
 bool GameState::bothPlayersSelectedCharacters() const {
-    return hasCompletedSelection(0) && hasCompletedSelection(1);
+    if (playerIds.size() != 2) {
+        return false;
+    }
+    for (int playerId : playerIds) {
+        if (!hasCompletedSelection(playerId)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // Character placement
@@ -142,7 +171,15 @@ bool GameState::hasCompletedPlacement(int playerId) const {
 }
 
 bool GameState::bothPlayersPlacedCharacters() const {
-    return hasCompletedPlacement(0) && hasCompletedPlacement(1);
+    if (playerIds.size() != 2) {
+        return false;
+    }
+    for (int playerId : playerIds) {
+        if (!hasCompletedPlacement(playerId)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // Character management
@@ -278,6 +315,11 @@ nlohmann::json GameState::toJson() const {
         }
         selectedJson[std::to_string(playerId)] = classArray;
     }
+
+    nlohmann::json readyJson = nlohmann::json::object();
+    for (const auto& [playerId, ready] : playerReady) {
+        readyJson[std::to_string(playerId)] = ready;
+    }
     
     return nlohmann::json{
         {"phase", static_cast<int>(phase)},
@@ -285,6 +327,7 @@ nlohmann::json GameState::toJson() const {
         {"characters", charactersJson},
         {"occupancy", occupancyJson},
         {"selectedClasses", selectedJson},
+        {"playerReady", readyJson},
         {"player0Actions", player0Actions.toJson()},
         {"player1Actions", player1Actions.toJson()},
         {"winnerId", winnerId}
@@ -314,6 +357,13 @@ GameState GameState::fromJson(const nlohmann::json& j) {
         int playerId = std::stoi(playerIdStr);
         for (int cls : classArray) {
             state.selectedClasses[playerId].push_back(static_cast<CharacterClass>(cls));
+        }
+    }
+
+    if (j.contains("playerReady")) {
+        for (auto& [playerIdStr, ready] : j["playerReady"].items()) {
+            int playerId = std::stoi(playerIdStr);
+            state.playerReady[playerId] = ready.get<bool>();
         }
     }
     
