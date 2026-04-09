@@ -114,7 +114,7 @@ endif()
 
 # Windows launcher uses the same SFML menu flow as the main client
 if(WIN32)
-    add_executable(HexGameLauncher
+    add_executable(HexGameLauncher WIN32
         sfml_main.cpp
         client/src/SFMLGameClient.cpp
         client/src/HexRenderer.cpp

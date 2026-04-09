@@ -8,6 +8,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace {
 
 constexpr float kWindowWidth = 900.0f;
@@ -63,7 +67,12 @@ struct InputField {
 };
 
 std::optional<sf::Font> loadMenuFont() {
-    const std::array<std::string, 4> candidates{
+    const std::array<std::string, 7> candidates{
+#ifdef _WIN32
+        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/segoeui.ttf",
+        "C:/Windows/Fonts/tahoma.ttf",
+#endif
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
         "/usr/share/fonts/TTF/DejaVuSans.ttf",
@@ -143,6 +152,13 @@ void setActiveField(std::vector<InputField>& fields, std::size_t index) {
 int main(int argc, char* argv[]) {
     auto fontOpt = loadMenuFont();
     if (!fontOpt.has_value()) {
+#ifdef _WIN32
+        MessageBoxA(nullptr,
+                    "Could not load any supported font.\n"
+                    "Expected system fonts were not found.",
+                    "HexGame Launcher Error",
+                    MB_OK | MB_ICONERROR);
+#endif
         return 1;
     }
     const sf::Font& font = *fontOpt;
