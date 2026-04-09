@@ -112,10 +112,21 @@ if(UNIX)
     target_link_libraries(HexGameClient PRIVATE pthread)
 endif()
 
-# Windows GUI launcher for entering server/port and starting client
+# Windows launcher uses the same SFML menu flow as the main client
 if(WIN32)
-    add_executable(HexGameLauncher WIN32
-        client/src/win_launcher.cpp
+    add_executable(HexGameLauncher
+        sfml_main.cpp
+        client/src/SFMLGameClient.cpp
+        client/src/HexRenderer.cpp
     )
-    target_compile_definitions(HexGameLauncher PRIVATE UNICODE _UNICODE)
+    target_include_directories(HexGameLauncher PRIVATE
+        ${CMAKE_SOURCE_DIR}/client/include
+    )
+    target_link_libraries(HexGameLauncher PRIVATE
+        HexGameCommon
+        SFML::Graphics
+        SFML::Window
+        SFML::System
+        SFML::Audio
+    )
 endif()
