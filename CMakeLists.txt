@@ -118,6 +118,7 @@ if(WIN32)
         sfml_main.cpp
         client/src/SFMLGameClient.cpp
         client/src/HexRenderer.cpp
+        client/src/WinMain.cpp
     )
     target_include_directories(HexGameLauncher PRIVATE
         ${CMAKE_SOURCE_DIR}/client/include
@@ -129,4 +130,9 @@ if(WIN32)
         SFML::System
         SFML::Audio
     )
+    if(TARGET sfml-main)
+        target_link_libraries(HexGameLauncher PRIVATE sfml-main)
+    elseif(TARGET SFML::Main)
+        target_link_libraries(HexGameLauncher PRIVATE SFML::Main)
+    endif()
 endif()
